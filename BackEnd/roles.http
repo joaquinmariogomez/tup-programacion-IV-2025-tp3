@@ -1,0 +1,34 @@
+@url=http://localhost:3000
+@token = {{adminToken}}
+
+@rolIdExistente = 1 // ID de un rol existente (ej. 'admin')
+
+### 1. Consultar todos los roles (Auth Requerida)
+GET {{url}}/roles
+Authorization: Bearer {{token}}
+
+### 2. Crear nuevo rol (Auth y Rol Admin Requerido)
+POST {{url}}/roles
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+    "rol": "Vendedor"
+}
+
+### 3. Consultar un rol por ID (Auth Requerida)
+GET {{url}}/roles/{{rolIdExistente}}
+Authorization: Bearer {{token}}
+
+### 4. Modificar rol por ID (PUT - Auth y Rol Admin Requerido)
+PUT {{url}}/roles/{{rolIdExistente}}
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+    "rol": "SuperAdmin"
+}
+
+### 5. Eliminar rol por ID (Auth y Rol Admin Requerido)
+DELETE {{url}}/roles/4 
+Authorization: Bearer {{token}}

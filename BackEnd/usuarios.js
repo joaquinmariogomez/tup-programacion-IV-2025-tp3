@@ -1,5 +1,5 @@
 import express from "express";
-import { execute } from "./db.js";
+import { db } from "./db.js";
 import { validarId, verificarValidaciones } from "./validaciones.js";
 import { body } from "express-validator";
 import bcrypt from "bcrypt";
@@ -9,7 +9,7 @@ const router = express.Router();
 
 // GET /usuarios - Listar todos (Requiere Autenticación)
 router.get("/", verificarAutenticacion, async (req, res) => {
-    const [rows] = await execute("SELECT id_usuario, username, nombre, apellido FROM usuarios");
+    const [rows] = await db.execute("SELECT id_usuario, username, nombre, apellido FROM usuarios");
     res.json({ success: true, usuarios: rows });
 });
 
@@ -21,7 +21,7 @@ router.get(
     verificarValidaciones,
     async (req, res) => {
         const id = Number(req.params.id);
-        const [rows] = await execute(
+        const [rows] = await db.execute(
         "SELECT id_usuario, username, nombre, apellido, activo FROM usuarios WHERE id_usuario=?",
         [id]
     );
@@ -33,11 +33,27 @@ router.get(
 }
 );
 
+// Middleware inteligente para la creación de usuarios
+const handleUserCreationSecurity = async (req, res, next) => {
+    try {
+        const [[{ count }]] = await db.execute("SELECT COUNT(*) as count FROM usuarios");
+        if (count > 0) {
+            // Si ya hay usuarios, aplicar seguridad normal
+            verificarAutenticacion(req, res, () => verificarAutorizacion("admin")(req, res, next));
+        } else {
+            // Si es el primer usuario, marcarlo y permitir la creación
+            req.isFirstUser = true;
+            next();
+        }
+    } catch (error) {
+        res.status(500).json({ success: false, message: "Error de base de datos al verificar usuarios." });
+    }
+};
+
 // POST /usuarios - Crear usuario (Requiere rol 'admin' y Hashing de Contraseña)
 router.post(
     "/",
-    verificarAutenticacion,
-    verificarAutorizacion("admin"), // Solo admin puede crear
+    handleUserCreationSecurity, // Usamos el nuevo middleware inteligente
     body("username", "Nombre de usuario inválido").isLength({ max: 20 }),
     body("nombre", "Nombre inválido").isLength({ max: 50 }),
     body("password", "Contraseña inválida").isStrongPassword({ minLength: 8 }),
@@ -48,14 +64,26 @@ router.post(
     // Crear Hash de la contraseña con bcrypt
     const hashedPassword = await bcrypt.hash(password, 12);
 
-    const [result] = await execute(
+    const [result] = await db.execute(
         "INSERT INTO usuarios (username, apellido, nombre, password_hash) VALUES (?,?,?,?)",
         [username, apellido, nombre, hashedPassword]
     );
 
+    const nuevoUsuarioId = result.insertId;
+
+    // Si es el primer usuario, forzar el rol de admin (ID 1).
+    // Si no, se podrían asignar otros roles o ninguno por defecto.
+    if (req.isFirstUser) {
+        try {
+            await db.execute("INSERT INTO usuarios_roles (id_usuario, id_rol) VALUES (?, ?)", [nuevoUsuarioId, 1]);
+        } catch (error) {
+            // Manejar el caso en que el rol con ID 1 no exista
+        }
+    }
+
     res.status(201).json({
         success: true,
-        data: { id: result.insertId, username, apellido, nombre },
+        data: { id: nuevoUsuarioId, username, apellido, nombre },
     });
 }
 );
@@ -69,7 +97,7 @@ router.delete(
     verificarValidaciones,
     async (req, res) => {
         const id = Number(req.params.id);
-        await execute("DELETE FROM usuarios WHERE id_usuario=?", [id]);
+        await db.execute("DELETE FROM usuarios WHERE id_usuario=?", [id]);
         res.json({ success: true, data: id });
     }
 );

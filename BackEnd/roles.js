@@ -1,5 +1,5 @@
 import express from "express";
-import { execute } from "./db.js";
+import { db } from "./db.js";
 import { body } from "express-validator";
 import { verificarAutenticacion, verificarAutorizacion } from "./auth.js";
 import { validarId, verificarValidaciones } from "./validaciones.js";
@@ -8,7 +8,7 @@ const router = express.Router();
 
 // Listar todos (Requiere Autenticación)
 router.get("/", verificarAutenticacion, async (req, res) => {
-    const [rows] = await execute("SELECT id_rol, rol FROM roles");
+    const [rows] = await db.execute("SELECT id_rol, rol FROM roles");
     res.json({ success: true, roles: rows });
 });
 
@@ -21,7 +21,7 @@ router.post(
     verificarValidaciones,
     async (req, res) => {
         const { rol } = req.body;
-        const [result] = await execute("INSERT INTO roles (rol) VALUES (?)", [rol]);
+        const [result] = await db.execute("INSERT INTO roles (rol) VALUES (?)", [rol]);
 
     res.status(201).json({
         success: true,
@@ -39,7 +39,7 @@ router.delete(
     verificarValidaciones,
     async (req, res) => {
         const id = Number(req.params.id);
-        await execute("DELETE FROM roles WHERE id_rol=?", [id]);
+        await db.execute("DELETE FROM roles WHERE id_rol=?", [id]);
         res.json({ success: true, data: id });
     }
 );

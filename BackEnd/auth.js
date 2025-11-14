@@ -1,6 +1,6 @@
 // backend/auth.js
 import express from "express";
-import { execute } from "./db.js";
+import { db } from "./db.js";
 import { verificarValidaciones } from "./validaciones.js";
 import { body } from "express-validator";
 import bcrypt from "bcrypt";
@@ -45,7 +45,7 @@ export const verificarAutorizacion = (rol) => {
 
 router.post(
     "/login",
-    body("username").isAlphanumeric("es-ES").isLength({ max: 20 }),
+    body("username").isLength({ max: 20 }),
     body("password").isStrongPassword({
         minLength: 8, // Minimo de 8 caracteres
         minLowercase: 1, // Al menos una letra en minusculas
@@ -58,7 +58,7 @@ router.post(
     const { username, password } = req.body;
 
     //Consultar usuario y password_hash
-    const [usuarios] = await execute("SELECT id_usuario, password_hash FROM usuarios WHERE username=?", [username]);
+    const [usuarios] = await db.execute("SELECT id_usuario, password_hash FROM usuarios WHERE username=?", [username]);
     if (usuarios.length === 0) {
         return res.status(400).json({ success: false, error: "Usuario o Contraseña inválido" });
     }
@@ -71,7 +71,7 @@ router.post(
     }
 
     //Obtener los roles del usuario
-    const [rolesDB] = await execute(
+    const [rolesDB] = await db.execute(
         "SELECT r.rol \
         FROM roles r \
         JOIN usuarios_roles ur ON r.id_rol = ur.id_rol \

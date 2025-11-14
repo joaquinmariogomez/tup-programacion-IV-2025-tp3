@@ -1,0 +1,18 @@
+@url=http://localhost:3000
+@token = {{adminToken}}
+
+@usuarioId = 1
+@rolId = 2
+
+### 1. Consultar relación específica (GET: Ruta Normal - NO Auth Requerida)
+GET {{url}}/usuarios-roles/usuarios/{{usuarioId}}/roles/{{rolId}}
+
+### 2. Modificar usuarios-roles (PUT - Auth y Rol Admin Requerido)
+PUT {{url}}/usuarios-roles/usuarios/{{usuarioId}}/roles/{{rolId}}
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+    "descripcion": "Descripción actualizada por Joaquin Admin",
+    "nivel": 10
+}
