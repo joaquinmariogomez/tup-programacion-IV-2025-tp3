@@ -1,14 +1,20 @@
 @url=http://localhost:3000
 
-@usuarioId = 1
-@rolId = 2
-
 ### Login de Administrador (Obtener JWT)
 # @name login
 POST {{url}}/auth/login
 Content-Type: application/json
-###
+
+{
+    "username": "joaquinAdmin",
+    "password": "TPfinal1234"
+}
+
+### Definir la variable para este archivo
 @token = {{login.response.body.token}}
+
+@usuarioId = 1
+@rolId = 2
 
 ### Consultar relación específica (GET: Ruta Normal - NO Auth Requerida)
 GET {{url}}/usuarios-roles/usuarios/{{usuarioId}}/roles/{{rolId}}
