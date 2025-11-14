@@ -7,6 +7,14 @@ import { verificarAutenticacion, verificarAutorizacion } from "./auth.js";
 
 const router = express.Router();
 
+// RUTA PÚBLICA: GET /usuarios/public - Listar información básica sin Autenticación
+router.get("/public", async (req, res) => {
+    // Es recomendable devolver solo datos no sensibles en rutas públicas
+    const [rows] = await db.execute("SELECT id_usuario, username, nombre, apellido FROM usuarios");
+    res.json({ success: true, usuarios: rows });
+});
+
+
 // GET /usuarios - Listar todos (Requiere Autenticación)
 router.get("/", verificarAutenticacion, async (req, res) => {
     const [rows] = await db.execute("SELECT id_usuario, username, nombre, apellido FROM usuarios");
@@ -50,10 +58,10 @@ const handleUserCreationSecurity = async (req, res, next) => {
     }
 };
 
-// POST /usuarios - Crear usuario (Requiere rol 'admin' y Hashing de Contraseña)
+// POST /usuarios - Crear usuario (Con lógica para asignar rol 'admin' al primero)
 router.post(
     "/",
-    handleUserCreationSecurity, // Usamos el nuevo middleware inteligente
+    handleUserCreationSecurity, 
     body("username", "Nombre de usuario inválido").isLength({ max: 20 }),
     body("nombre", "Nombre inválido").isLength({ max: 50 }),
     body("password", "Contraseña inválida").isStrongPassword({ minLength: 8 }),
@@ -64,6 +72,7 @@ router.post(
     // Crear Hash de la contraseña con bcrypt
     const hashedPassword = await bcrypt.hash(password, 12);
 
+    // 1. Crear el usuario
     const [result] = await db.execute(
         "INSERT INTO usuarios (username, apellido, nombre, password_hash) VALUES (?,?,?,?)",
         [username, apellido, nombre, hashedPassword]
@@ -71,13 +80,22 @@ router.post(
 
     const nuevoUsuarioId = result.insertId;
 
-    // Si es el primer usuario, forzar el rol de admin (ID 1).
-    // Si no, se podrían asignar otros roles o ninguno por defecto.
+    // Asignar rol de admin al primer usuario para el setup inicial
     if (req.isFirstUser) {
         try {
+            // 2. Intentar asignar el rol de administrador (ID 1)
             await db.execute("INSERT INTO usuarios_roles (id_usuario, id_rol) VALUES (?, ?)", [nuevoUsuarioId, 1]);
         } catch (error) {
-            // Manejar el caso en que el rol con ID 1 no exista
+            // Si falla la asignación de rol (ej. el rol ID 1 no existe - Foreign Key)
+            
+            // 3. Eliminar el usuario recién creado para evitar inconsistencias
+            await db.execute("DELETE FROM usuarios WHERE id_usuario=?", [nuevoUsuarioId]);
+
+            // Devolver un error explícito al cliente
+            return res.status(500).json({ 
+                success: false, 
+                message: "Error al crear el primer usuario y asignar el rol de administrador. Verifique que el rol con ID 1 exista en su tabla 'roles'.", 
+            });
         }
     }
 
@@ -92,7 +110,7 @@ router.post(
 router.delete(
     "/:id",
     verificarAutenticacion,
-    verificarAutorizacion("admin"), // Solo admin puede eliminar
+    verificarAutorizacion("admin"), 
     validarId,
     verificarValidaciones,
     async (req, res) => {

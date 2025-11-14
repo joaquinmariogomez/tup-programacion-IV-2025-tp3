@@ -1,47 +1,66 @@
 @url=http://localhost:3000
-@token = {{adminToken}}
 
-@usuarioIdExistente = 1 // ID de usuario existente para GET
-@rolIdParaAsignar = 5 // ID de rol existente
+// 1. LOGIN (EJECUTAR ESTE BLOQUE PRIMERO EN ESTE ARCHIVO)
+// El token se guarda en la variable @token para las peticiones de abajo.
+### Login de Administrador (Obtener JWT)
+# @name login
+POST {{url}}/auth/login
+Content-Type: application/json
 
-### 1. Consultar todos los usuarios (Auth Requerida)
+{
+    "username": "joaquinAdmin",
+    "password": "TPfinal1234"
+}
+
+### Definir la variable para este archivo
+@token = {{login.response.body.token}}
+
+
+
+### Consultar todos los usuarios (Ruta Pública - NO Requiere Auth)
+GET {{url}}/usuarios/public
+
+@usuarioIdExistente = 1 
+@rolIdParaAsignar = 1 
+
+### Consultar todos los usuarios (Ruta Protegida - Auth Requerida)
 GET {{url}}/usuarios
 Authorization: Bearer {{token}}
 
-### 2. Crear usuario (Auth y Rol Admin Requerido)
+### Crear usuario (Auth y Rol Admin Requerido)
 POST {{url}}/usuarios
 Authorization: Bearer {{token}}
 Content-Type: application/json
 
 {
-    "username": "joaquinAdmin",
+    "username": "joaquinTest",
     "apellido": "Gomez",
-    "nombre":"Joaquin",
+    "nombre":"Test",
     "password": "TPfinal1234",
     "activo": true
 }
 
-### 3. Consultar por un usuario por ID (Auth Requerida)
+### Consultar por un usuario por ID (Auth Requerida)
 GET {{url}}/usuarios/{{usuarioIdExistente}}
 Authorization: Bearer {{token}}
 
-### 4. Consultar roles de un usuario (GET /usuarios/:id/roles - Auth Requerida)
+### Consultar roles de un usuario (GET /usuarios/:id/roles - Auth Requerida)
 GET {{url}}/usuarios/{{usuarioIdExistente}}/roles
 Authorization: Bearer {{token}}
 
-### 5. Asignar rol a usuario (POST /usuarios/:id/roles - Admin Requerido)
+### Asignar rol a usuario (POST /usuarios/:id/roles - Admin Requerido)
 POST {{url}}/usuarios/{{usuarioIdExistente}}/roles
 Authorization: Bearer {{token}}
 Content-Type: application/json
 
 {
-    "rolId": {{rolIdParaAsignar}}
+    "id_rol": {{rolIdParaAsignar}}
 }
 
-### 6. Quitar rol a usuario (DELETE /usuarios/:id/roles/:rolId - Admin Requerido)
+### Quitar rol a usuario (DELETE /usuarios/:id/roles/:rolId - Admin Requerido)
 DELETE {{url}}/usuarios/{{usuarioIdExistente}}/roles/{{rolIdParaAsignar}}
 Authorization: Bearer {{token}}
 
-### 7. Eliminar usuario por ID (Auth y Rol Admin Requerido)
+### Eliminar usuario por ID (Auth y Rol Admin Requerido)
 DELETE {{url}}/usuarios/4 
 Authorization: Bearer {{token}}

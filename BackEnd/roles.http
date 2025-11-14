@@ -1,26 +1,40 @@
 @url=http://localhost:3000
-@token = {{adminToken}}
 
-@rolIdExistente = 1 // ID de un rol existente (ej. 'admin')
+// 1. LOGIN (EJECUTAR ESTE BLOQUE PRIMERO EN ESTE ARCHIVO)
+// El token se guarda en la variable @token para las peticiones de abajo.
+### Login de Administrador (Obtener JWT)
+# @name login
+POST {{url}}/auth/login
+Content-Type: application/json
 
-### 1. Consultar todos los roles (Auth Requerida)
+{
+    "username": "joaquinAdmin",
+    "password": "TPfinal1234"
+}
+
+### Definir la variable para este archivo
+@token = {{login.response.body.token}}
+
+@rolIdExistente = 1 
+
+### Consultar todos los roles (Auth Requerida)
 GET {{url}}/roles
 Authorization: Bearer {{token}}
 
-### 2. Crear nuevo rol (Auth y Rol Admin Requerido)
+### Crear nuevo rol (Auth y Rol Admin Requerido)
 POST {{url}}/roles
 Authorization: Bearer {{token}}
 Content-Type: application/json
 
 {
-    "rol": "Vendedor"
+    "rol": "admin"
 }
 
-### 3. Consultar un rol por ID (Auth Requerida)
+### Consultar un rol por ID (Auth Requerida)
 GET {{url}}/roles/{{rolIdExistente}}
 Authorization: Bearer {{token}}
 
-### 4. Modificar rol por ID (PUT - Auth y Rol Admin Requerido)
+### Modificar rol por ID (PUT - Auth y Rol Admin Requerido)
 PUT {{url}}/roles/{{rolIdExistente}}
 Authorization: Bearer {{token}}
 Content-Type: application/json
@@ -29,6 +43,6 @@ Content-Type: application/json
     "rol": "SuperAdmin"
 }
 
-### 5. Eliminar rol por ID (Auth y Rol Admin Requerido)
+### Eliminar rol por ID (Auth y Rol Admin Requerido)
 DELETE {{url}}/roles/4 
 Authorization: Bearer {{token}}
