@@ -1,11 +1,14 @@
-// backend/index.js
+// backend/index.js (ACTUALIZADO)
 import express from "express";
 import cors from "cors";
 import usuariosRouter from "./usuarios.js";
 import rolesRouter from "./roles.js";
 import usuariosRolesRouter from "./usuarios-roles.js";
+import vehiculosRouter from "./vehiculos.js";    // NUEVA LÍNEA
+import conductoresRouter from "./conductores.js";  // NUEVA LÍNEA
+import viajesRouter from "./viajes.js";          // NUEVA LÍNEA
 import authRouter, { authConfig } from "./auth.js";
-import "dotenv/config"; // Para leer el .env
+import "dotenv/config";
 
     const app = express();
     const port = process.env.PORT || 3000;
@@ -27,9 +30,11 @@ import "dotenv/config"; // Para leer el .env
     app.use("/roles", rolesRouter);
     app.use("/auth", authRouter);
     app.use("/usuarios-roles", usuariosRolesRouter);
+    app.use("/vehiculos", vehiculosRouter);     // NUEVA LÍNEA
+    app.use("/conductores", conductoresRouter);  // NUEVA LÍNEA
+    app.use("/viajes", viajesRouter);           // NUEVA LÍNEA
 
     // MIDDLEWARE DE MANEJO DE ERRORES GLOBAL (Debe ir al final)
-    // Garantiza que cualquier fallo del servidor devuelva JSON 500
     app.use((err, req, res, next) => {
         console.error(err.stack);
         

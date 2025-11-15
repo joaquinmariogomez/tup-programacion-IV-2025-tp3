@@ -14,6 +14,11 @@ import { CrearUsuario } from "./CrearUsuario.jsx";
 import { DetallesUsuario } from "./DetallesUsuario.jsx"; 
 import { ModificarUsuario } from "./ModificarUsuarios.jsx"; 
 
+// Componentes CRUD NUEVOS
+import { Vehiculos } from "./Vehiculos.jsx"; 
+import { Conductores } from "./Conductores.jsx"; // IMPORTAR
+import { Viajes } from "./Viajes.jsx";         // IMPORTAR
+
 
 createRoot(document.getElementById("root")).render(
     <React.StrictMode>
@@ -25,57 +30,52 @@ createRoot(document.getElementById("root")).render(
                         <Route index element={<Home />} />
                         <Route path="ingresar" element={<Ingresar />} />
                         
-                        {/* Rutas Protegidas por Autenticación */}
+                        {/* RUTAS DE VEHÍCULOS (NUEVO FOCO DEL TP) */}
+                        <Route
+                            path="vehiculos"
+                            element={<AuthPage><Vehiculos /></AuthPage>} // Listado
+                        />
+                        <Route
+                            path="vehiculos/crear"
+                            element={<AuthPage><AuthRol rol="admin"><h2>Crear Vehículo - Implementar CrearVehiculo.jsx</h2></AuthRol></AuthPage>}
+                        />
+                        <Route
+                            path="vehiculos/:id"
+                            element={<AuthPage><h2>Detalles Vehículo - Implementar DetallesVehiculo.jsx</h2></AuthPage>}
+                        />
+                        
+                        {/* RUTAS DE CONDUCTORES */}
+                        <Route
+                            path="conductores"
+                            element={<AuthPage><Conductores /></AuthPage>} // Listado
+                        />
+
+                        {/* RUTAS DE VIAJES */}
+                        <Route
+                            path="viajes"
+                            element={<AuthPage><Viajes /></AuthPage>} // Listado
+                        />
+
+                        {/* RUTAS DE USUARIOS Y ROLES (Originales) */}
                         <Route
                             path="usuarios"
-                            element={
-                                <AuthPage>
-                                    <Usuarios />
-                                </AuthPage>
-                            }
+                            element={<AuthPage><Usuarios /></AuthPage>}
                         />
-
-                        {/* Ruta para ver detalles (DetallesUsuario) - REQUIERE AUTH */}
                         <Route
                             path="usuarios/:id"
-                            element={
-                                <AuthPage>
-                                    <DetallesUsuario />
-                                </AuthPage>
-                            }
+                            element={<AuthPage><DetallesUsuario /></AuthPage>}
                         />
-                        
-                        {/* Ruta para modificar (ModificarUsuario) - REQUIERE AUTH + ROL ADMIN */}
                         <Route
                             path="usuarios/:id/modificar"
-                            element={
-                                <AuthPage>
-                                    <AuthRol rol="admin">
-                                        <ModificarUsuario />
-                                    </AuthRol>
-                                </AuthPage>
-                            }
+                            element={<AuthPage><AuthRol rol="admin"><ModificarUsuario /></AuthRol></AuthPage>}
                         />
-
-                        {/* Ruta para crear (CrearUsuario) - REQUIERE AUTH + ROL ADMIN */}
                         <Route
                             path="usuarios/crear"
-                            element={
-                                <AuthPage>
-                                    <AuthRol rol="admin"> 
-                                        <CrearUsuario />
-                                    </AuthRol>
-                                </AuthPage>
-                            }
+                            element={<AuthPage><AuthRol rol="admin"><CrearUsuario /></AuthRol></AuthPage>}
                         />
-                        
                         <Route
                             path="roles"
-                            element={
-                                <AuthPage>
-                                    <Roles />
-                                </AuthPage>
-                            }
+                            element={<AuthPage><Roles /></AuthPage>}
                         />
                         
                     </Route>
