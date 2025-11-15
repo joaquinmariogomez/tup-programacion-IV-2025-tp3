@@ -12,7 +12,7 @@ import { Usuarios } from "./Usuarios.jsx";
 import { Roles } from "./Roles.jsx"; 
 import { CrearUsuario } from "./CrearUsuario.jsx";
 import { DetallesUsuario } from "./DetallesUsuario.jsx"; 
-import { ModificarUsuario } from "./ModificarUsuario.jsx"; 
+import { ModificarUsuario } from "./ModificarUsuarios.jsx"; 
 
 
 createRoot(document.getElementById("root")).render(

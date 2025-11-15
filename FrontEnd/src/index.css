@@ -66,3 +66,70 @@ button:focus-visible {
     background-color: #f9f9f9;
   }
 }
+
+/* Sobrescribe variables de PicoCSS para una paleta más profesional */
+:root {
+    --pico-primary-hue: 200; 
+    --pico-primary: hsl(var(--pico-primary-hue), 65%, 35%);
+    --pico-primary-hover: hsl(var(--pico-primary-hue), 70%, 30%);
+    --pico-secondary: var(--pico-gray-300); 
+    
+    /* Un fondo muy ligero para que no sea blanco puro */
+    --pico-background-color: #f7f7f9; 
+    --pico-border-color: var(--pico-gray-200);
+
+    /* Aumentar la separación en el layout */
+    --pico-spacing: 1.6rem;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    line-height: 1.5;
+}
+
+/* Estilos para el Header y Navegación */
+header {
+    background-color: #ffffff;
+    padding: 1rem 0;
+    border-bottom: 1px solid var(--pico-border-color);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    margin-bottom: 2rem;
+}
+
+nav ul {
+    align-items: center;
+}
+
+/* Espacio entre los elementos de la derecha (Usuario y Logout) */
+nav ul:last-child {
+    gap: 15px; 
+}
+
+/* Estilos para Tablas */
+table {
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.04);
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+/* Cabecera de la tabla */
+thead th {
+    background-color: var(--pico-gray-100);
+    color: var(--pico-color);
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.9em;
+}
+
+/* Contenido principal */
+main.container {
+    padding-top: 1rem;
+    padding-bottom: 2rem;
+}
+
+/* Estilo para las listas de roles en detalles */
+article ul {
+    margin-left: 0;
+    padding-left: 1.5rem;
+    list-style-type: disc;
+}

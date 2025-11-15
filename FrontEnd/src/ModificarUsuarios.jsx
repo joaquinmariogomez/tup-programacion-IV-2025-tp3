@@ -18,6 +18,7 @@ export function ModificarUsuario() {
     useEffect(() => {
         async function loadUsuario() {
             try {
+                // Obtener datos iniciales con GET /usuarios/:id
                 const response = await fetchAuth(`http://localhost:3000/usuarios/${id}`);
                 const data = await response.json();
                 

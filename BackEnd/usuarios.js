@@ -41,6 +41,27 @@ router.get(
 }
 );
 
+// GET /usuarios/:id/roles - Obtener los roles de un usuario (Requiere Autenticación)
+router.get(
+    "/:id/roles",
+    verificarAutenticacion,
+    validarId,
+    verificarValidaciones,
+    async (req, res) => {
+        const id = Number(req.params.id);
+
+        const [rows] = await db.execute(
+            "SELECT r.id_rol, r.rol " +
+            "FROM roles r " +
+            "JOIN usuarios_roles ur ON r.id_rol = ur.id_rol " +
+            "WHERE ur.id_usuario = ?",
+            [id]
+        );
+
+        res.json({ success: true, roles: rows });
+    }
+);
+
 // Middleware inteligente para la creación de usuarios
 const handleUserCreationSecurity = async (req, res, next) => {
     try {

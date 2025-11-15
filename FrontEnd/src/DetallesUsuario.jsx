@@ -3,7 +3,7 @@ import { useParams, Link } from "react-router-dom";
 import { useAuth, AuthRol } from "./Auth.jsx";
 
 export function DetallesUsuario() {
-    const { id } = useParams(); // Obtiene el ID del usuario de la URL
+    const { id } = useParams();
     const { fetchAuth } = useAuth();
     
     const [usuario, setUsuario] = useState(null);
@@ -11,27 +11,39 @@ export function DetallesUsuario() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
-    // Carga los datos del usuario y sus roles
     const fetchDetalles = useCallback(async () => {
         setError(null);
         setLoading(true);
         try {
-            // Petición GET segura para obtener detalles del usuario
+            // --- Petición 1: Detalles del usuario ---
             const userResponse = await fetchAuth(`http://localhost:3000/usuarios/${id}`);
+            
+            if (!userResponse.ok) {
+                 // Intentamos leer el error JSON que DEBE devolver el Backend
+                 const errorData = await userResponse.json();
+                 throw new Error(errorData.message || `Fallo (${userResponse.status}) al cargar el usuario.`);
+            }
             const userData = await userResponse.json();
 
-            // Petición GET segura para obtener roles del usuario (Ruta pendiente en BackEnd, asumimos /usuarios/:id/roles)
+            // --- Petición 2: Roles del usuario ---
             const rolesResponse = await fetchAuth(`http://localhost:3000/usuarios/${id}/roles`);
+            
+            if (!rolesResponse.ok) {
+                 const errorData = await rolesResponse.json();
+                 throw new Error(errorData.message || `Fallo (${rolesResponse.status}) al cargar los roles.`);
+            }
             const rolesData = await rolesResponse.json();
 
-            if (!userResponse.ok || !rolesResponse.ok) {
-                throw new Error(userData.message || rolesData.error || "Fallo al cargar los detalles.");
-            }
 
             setUsuario(userData.usuario);
             setRoles(rolesData.roles);
         } catch (err) {
-            setError(err.message);
+            // Este bloque atrapa el error de JSON si la respuesta fue HTML
+            if (err.message.includes("valid JSON")) {
+                 setError("Error Crítico de Servidor: La API devolvió un formato incorrecto (HTML) en lugar de datos JSON. Revise su Backend.");
+            } else {
+                 setError(err.message);
+            }
         } finally {
             setLoading(false);
         }
@@ -46,7 +58,7 @@ export function DetallesUsuario() {
     }
 
     if (error) {
-        return <p style={{ color: 'red' }}>Error al cargar usuario: {error}</p>;
+        return <p style={{ color: 'red' }}>Error: {error}</p>;
     }
     
     if (!usuario) {
@@ -70,7 +82,6 @@ export function DetallesUsuario() {
                 )}
             </ul>
             
-            {/* Botón visible solo si el usuario tiene el rol 'admin' */}
             <AuthRol rol="admin">
                  <Link role="button" to={`/usuarios/${id}/modificar`}>
                     Modificar Usuario
